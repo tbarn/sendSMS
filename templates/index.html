@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Send SMS{% endblock %}
+
+{% block head %}{% endblock %}
+
+{% block content %}
+<div id="container">
+	<header>
+		<div id="header"></div>
+	</header>
+	<section>
+		<div id="content">
+			<form id="form" method="POST" action="/">
+				<div id="number_label">{{form.phone_number.label}}</div>
+				<div id="phone_number">{{form.phone_number}}</div>
+				<input type="submit" value="Send SMS" class="button"/>
+			</form>
+		</div>
+	</section>
+</div>
+{% endblock %}
