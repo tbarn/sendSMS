@@ -13,9 +13,9 @@ app = Flask(__name__)
 #TODO: Make config file
 
 # Uncomment and fill out with your information
-sending_number = ""
-account_sid = ""
-auth_token  = ""
+# sending_number = ""
+# account_sid = ""
+# auth_token  = ""
 
 app.client = TwilioRestClient(account_sid, auth_token)
 
