@@ -25,7 +25,7 @@ def index():
 	if request.method == 'POST' and form.validate():
 		try:
 			#TODO: Create different cases for types of messages, will also need to change index.html
-			app.client.sms.messages.create(body="Hello World",
+			app.client.sms.messages.create(body="Hello " + form.getName().data + "!",
 				from_=sending_number, to="+1" + form.getNumber().data)
 		except TwilioRestException as e:
 			#TODO: Add more error handling
