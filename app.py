@@ -1,23 +1,22 @@
 import os
 
 from flask import Flask
-from flask import render_template, request
+from flask import render_template
+from flask import request
 
 from twilio import TwilioRestException
 from twilio.rest import TwilioRestClient 
 
+from keen.client import KeenClient
+
 from forms import PhoneNumberForm
 
 app = Flask(__name__)
+app.config.from_pyfile('local_settings.py')
 
-#TODO: Make config file
+client = TwilioRestClient(app.config['TWILIO_ACCOUNT_SID'], app.config['TWILIO_AUTH_TOKEN'])
 
-# Uncomment and fill out with your information
-# sending_number = ""
-# account_sid = ""
-# auth_token  = ""
-
-app.client = TwilioRestClient(account_sid, auth_token)
+keen = KeenClient(app.config['KEEN_PROJECT_ID'], app.config['KEEN_WRITE_KEY'], app.config['KEEN_READ_KEY'])
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -25,13 +24,14 @@ def index():
 	if request.method == 'POST' and form.validate():
 		try:
 			#TODO: Create different cases for types of messages, will also need to change index.html
-			app.client.sms.messages.create(body="Hello " + form.getName().data + "!",
-				from_=sending_number, to="+1" + form.getNumber().data)
+			client.messages.create(body="Hello " + form.getName().data + "!",
+				from_=app.config['TWILIO_CALLER_ID'], to="+1" + form.getNumber().data)
 		except TwilioRestException as e:
-			#TODO: Add more error handling
-			 form.phone_number.errors = [unicode(e.msg)]
-			 return render_template('index.html', form=form)
+			print e 
+			form.phone_number.errors = [unicode(e.msg)]
+			return render_template('index.html', form=form)
 		params = {'phone_number': request.form['phone_number']}
+		keen.add_event("text_message", { "message_sent": True })
 		return render_template('success.html', params=params)
 	else: 
 		form = PhoneNumberForm()
@@ -39,7 +39,7 @@ def index():
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
+    port = int(os.environ.get("PORT", 8000))
     if port == 5000:
     	app.debug = True
     app.run(host='0.0.0.0', port=port)
